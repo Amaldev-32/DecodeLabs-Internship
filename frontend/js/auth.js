@@ -1,6 +1,6 @@
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? 'http://localhost:5000/api' 
-    : 'https://your-backend-vercel-url.vercel.app/api';
+    : 'https://decode-labs-internship-sandy.vercel.app/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     const authModal = document.getElementById('auth-modal');
