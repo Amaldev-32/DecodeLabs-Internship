@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craftverse | Art & DIY Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button id="sidebar-toggle" class="btn-icon">
+                <span class="icon-menu">☰</span>
+            </button>
+            <h1 class="logo">Craftverse</h1>
+        </div>
+        <div class="header-center">
+            <div class="search-bar">
+                <input type="text" placeholder="Search products, sellers, categories...">
+                <button type="submit">Search</button>
+            </div>
+        </div>
+        <div class="header-right" id="nav-actions">
+            <!-- Dynamic content based on auth state -->
+            <button class="btn-text">Become a Seller</button>
+            <div class="profile-menu">
+                <span class="profile-icon">👤</span>
+                <span class="profile-text">Login / Sign In</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <section class="filter-group">
+                <h3>Price</h3>
+                <select id="sort-price">
+                    <option value="relevance">Relevance</option>
+                    <option value="low-high">Low to High</option>
+                    <option value="high-low">High to Low</option>
+                </select>
+            </section>
+            <section class="filter-group">
+                <h3>Category</h3>
+                <div class="filter-options">
+                    <label><input type="checkbox" value="art"> Art</label>
+                    <label><input type="checkbox" value="diy"> DIY</label>
+                    <label><input type="checkbox" value="painting"> Painting</label>
+                    <label><input type="checkbox" value="crafts"> Crafts</label>
+                </div>
+            </section>
+            <section class="filter-group">
+                <h3>Rating</h3>
+                <div class="filter-options">
+                    <label><input type="radio" name="rating" value="5"> 5 Stars</label>
+                    <label><input type="radio" name="rating" value="4"> 4+ Stars</label>
+                    <label><input type="radio" name="rating" value="3"> 3+ Stars</label>
+                </div>
+            </section>
+            <section class="filter-group">
+                <h3>Color</h3>
+                <div class="color-palette">
+                    <button class="color-btn" style="background-color: red;"></button>
+                    <button class="color-btn" style="background-color: blue;"></button>
+                    <button class="color-btn" style="background-color: green;"></button>
+                    <button class="color-btn" style="background-color: white; border: 1px solid #ccc;"></button>
+                    <button class="color-btn" style="background-color: black;"></button>
+                </div>
+            </section>
+        </aside>
+
+        <main class="main-content">
+            <div id="product-grid" class="product-grid">
+                <!-- Product cards will be injected here -->
+                <p>Loading products...</p>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Craftverse. All rights reserved.</p>
+    </footer>
+
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="auth-step-1">
+                <h2>Login / Sign Up</h2>
+                <div class="form-group">
+                    <label>Choose Login Method</label>
+                    <select id="login-method">
+                        <option value="email">Email Address</option>
+                        <option value="phone">Phone Number</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="auth-identifier" placeholder="Enter Email or Phone">
+                </div>
+                <button id="send-otp-btn" class="btn-primary">Send OTP</button>
+            </div>
+            <div id="auth-step-2" style="display: none;">
+                <h2>Verify OTP</h2>
+                <p>OTP sent to: <span id="display-identifier"></span></p>
+                <div class="form-group">
+                    <input type="text" id="otp-input" placeholder="Enter 6-digit OTP (123456)">
+                </div>
+                <button id="verify-otp-btn" class="btn-primary">Verify OTP</button>
+            </div>
+            <div id="auth-step-3" style="display: none;">
+                <h2>Complete Profile</h2>
+                <div class="form-group">
+                    <input type="text" id="first-name" placeholder="First Name">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="last-name" placeholder="Last Name">
+                </div>
+                <div class="form-group">
+                    <select id="gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button id="complete-reg-btn" class="btn-primary">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

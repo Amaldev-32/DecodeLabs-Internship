@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product | Craftverse</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <h1 class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">Craftverse</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn-text" onclick="window.location.href='seller.html'">Back to Dashboard</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="form-container">
+            <h2>Add New Product</h2>
+            <form id="add-product-form">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="p-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="p-category">
+                        <option value="art">Art</option>
+                        <option value="diy">DIY</option>
+                        <option value="painting">Painting</option>
+                        <option value="crafts">Crafts</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" id="p-price" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Stock</label>
+                        <input type="number" id="p-stock" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p-desc" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="p-image" placeholder="Paste image link here">
+                </div>
+                <div class="form-group">
+                    <label>Specifications</label>
+                    <textarea id="p-specs"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Artistic Details</label>
+                    <textarea id="p-artistic"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <select id="p-color">
+                        <option value="">Select Color</option>
+                        <option value="red">Red</option>
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="white">White</option>
+                        <option value="black">Black</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Build Quality</label>
+                    <textarea id="p-quality"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>FAQ (Question | Answer)</label>
+                    <div id="faq-container">
+                        <div class="faq-input">
+                            <input type="text" placeholder="Question" class="faq-q">
+                            <input type="text" placeholder="Answer" class="faq-a">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-text" id="add-faq-btn">+ Add More FAQ</button>
+                </div>
+                <button type="submit" class="btn-primary">List Product</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('add-faq-btn').addEventListener('click', () => {
+            const container = document.getElementById('faq-container');
+            const div = document.createElement('div');
+            div.className = 'faq-input';
+            div.innerHTML = `
+                <input type="text" placeholder="Question" class="faq-q">
+                <input type="text" placeholder="Answer" class="faq-a">
+            `;
+            container.appendChild(div);
+        });
+
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+
+            const faqElements = document.querySelectorAll('.faq-input');
+            const faq = Array.from(faqElements)
+                .map(el => ({
+                    question: el.querySelector('.faq-q').value,
+                    answer: el.querySelector('.faq-a').value
+                }))
+                .filter(f => f.question && f.answer);
+            
+            const productData = {
+                name: document.getElementById('p-name').value,
+                category: document.getElementById('p-category').value,
+                price: Number(document.getElementById('p-price').value),
+                stock: Number(document.getElementById('p-stock').value),
+                description: document.getElementById('p-desc').value,
+                images: [document.getElementById('p-image').value],
+                specifications: document.getElementById('p-specs').value,
+                artisticDetails: document.getElementById('p-artistic').value,
+                buildQuality: document.getElementById('p-quality').value,
+                color: document.getElementById('p-color').value,
+                faq: faq
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Product listed successfully!');
+                    window.location.href = 'seller.html';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

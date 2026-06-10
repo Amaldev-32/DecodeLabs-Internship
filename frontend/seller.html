@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard | Craftverse</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <h1 class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">Craftverse</h1>
+        </div>
+        <div class="header-right" id="nav-actions">
+            <button class="btn-text" onclick="window.location.href='index.html'">Home</button>
+            <div class="profile-menu">
+                <span class="profile-icon">👤</span>
+                <span class="profile-text">Profile</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="seller-registration" class="form-container" style="display: none;">
+            <h2>Become a Seller</h2>
+            <p>Join our community of artists and DIY creators.</p>
+            <div class="form-group">
+                <label>Profession</label>
+                <input type="text" id="seller-profession" placeholder="e.g. Potter, Painter, Woodworker">
+            </div>
+            <div class="form-group">
+                <label>Experience</label>
+                <input type="text" id="seller-experience" placeholder="e.g. 5 years, Self-taught">
+            </div>
+            <div class="form-group">
+                <label>Product Description</label>
+                <textarea id="seller-description" placeholder="Briefly describe what you plan to sell..."></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="seller-ethics">
+                <label for="seller-ethics">I commit to fairness and honesty in my business practices.</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="seller-terms">
+                <label for="seller-terms">I agree to the Terms and Conditions.</label>
+            </div>
+            <button id="register-seller-btn" class="btn-primary">Register as Seller</button>
+        </div>
+
+        <div id="seller-dashboard" class="dashboard-container" style="display: none;">
+            <div class="dashboard-header">
+                <h2>My Products</h2>
+                <button class="btn-primary" onclick="window.location.href='add-product.html'">+ Add New Product</button>
+            </div>
+            <div id="seller-product-grid" class="product-grid">
+                <!-- Seller's products will be loaded here -->
+            </div>
+
+            <div class="dashboard-section">
+                <div class="dashboard-header">
+                    <h2>Recent Buy Requests</h2>
+                    <button class="btn-text" onclick="window.location.href='transactions.html'">View All Transactions</button>
+                </div>
+                <div id="buy-requests-list" class="requests-list">
+                    <p>No new requests.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const registrationDiv = document.getElementById('seller-registration');
+            const dashboardDiv = document.getElementById('seller-dashboard');
+
+            if (user && user.isSeller) {
+                dashboardDiv.style.display = 'block';
+                fetchSellerProducts();
+                fetchBuyRequests();
+            } else {
+                registrationDiv.style.display = 'block';
+            }
+
+            // Registration Logic
+            document.getElementById('register-seller-btn').addEventListener('click', async () => {
+                const profession = document.getElementById('seller-profession').value;
+                const experience = document.getElementById('seller-experience').value;
+                const description = document.getElementById('seller-description').value;
+                const ethics = document.getElementById('seller-ethics').checked;
+                const terms = document.getElementById('seller-terms').checked;
+
+                if (!profession || !experience || !description || !ethics || !terms) {
+                    alert('Please fill all fields and accept terms.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${API_URL}/sellers/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ profession, experience, description, termsAccepted: terms })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        user.isSeller = true;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        alert('Registration successful!');
+                        location.reload();
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+
+            async function fetchSellerProducts() {
+                try {
+                    const res = await fetch(`${API_URL}/products?sellerId=${user.id}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        renderSellerProducts(data.products);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            function renderSellerProducts(products) {
+                const grid = document.getElementById('seller-product-grid');
+                if (products.length === 0) {
+                    grid.innerHTML = '<p>You haven\'t added any products yet.</p>';
+                    return;
+                }
+                grid.innerHTML = products.map(p => `
+                    <div class="product-card">
+                        <img src="${p.images[0] || 'https://via.placeholder.com/250x200'}" class="product-image">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <p class="product-price">$${p.price}</p>
+                            <p>Stock: ${p.stock}</p>
+                            <button class="btn-text" onclick="editProduct('${p._id}')">Edit</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            async function fetchBuyRequests() {
+                try {
+                    const res = await fetch(`${API_URL}/requests/seller`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        renderRequests(data.requests);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            function renderRequests(requests) {
+                const list = document.getElementById('buy-requests-list');
+                if (requests.length === 0) return;
+                list.innerHTML = requests.map(r => `
+                    <div class="request-item">
+                        <p><strong>Product:</strong> ${r.productId.name}</p>
+                        <p><strong>Buyer:</strong> ${r.buyerId.firstName} ${r.buyerId.lastName}</p>
+                        <p><strong>Contact:</strong> ${r.buyerId.phone || r.buyerId.email}</p>
+                        <p><strong>Status:</strong> ${r.status}</p>
+                        ${r.status === 'Pending' ? `
+                            <button onclick="updateRequest('${r._id}', 'Approved')" class="btn-secondary">Approve</button>
+                            <button onclick="updateRequest('${r._id}', 'Rejected')" class="btn-text">Reject</button>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        });
+
+        async function updateRequest(id, status) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/requests/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Request ${status}`);
+                    location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
